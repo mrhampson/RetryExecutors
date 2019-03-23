@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mrhampson/RetryExecutors.svg?branch=master)](https://travis-ci.org/mrhampson/RetryExecutors)
+
 # RetryExecutors
 Java `Executor` that makes it easy to have tasks retry if they fail
 
