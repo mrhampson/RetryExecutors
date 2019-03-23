@@ -85,7 +85,7 @@ public class RetryExecutor implements Executor {
         retryStrategy = AnnotationToRetryStrategyFactory.fromAnnotation(annotation);
       }
       catch (IllegalArgumentException ignored) {
-
+        continue;
       }
       return retryStrategy;
     }
