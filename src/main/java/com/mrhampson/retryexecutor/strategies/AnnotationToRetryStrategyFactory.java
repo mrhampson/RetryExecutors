@@ -19,10 +19,12 @@
 
 package com.mrhampson.retryexecutor.strategies;
 
+import com.mrhampson.retryexecutor.annotations.RetryWithCustomDelay;
 import com.mrhampson.retryexecutor.annotations.RetryWithExponentialDelay;
 import com.mrhampson.retryexecutor.annotations.RetryWithFixedDelay;
 
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 /**
  * Class serves as a mapping from the annotations to the corresponding {@link com.mrhampson.retryexecutor.strategies.RetryStrategy}
@@ -44,8 +46,33 @@ public class AnnotationToRetryStrategyFactory {
       return ExponentialStrategy.fromAnnotation((RetryWithExponentialDelay)annotation);
     } else if (annotation instanceof RetryWithFixedDelay) {
       return ConstantStrategy.fromAnnotation((RetryWithFixedDelay)annotation);
-    } else {
+    } else if (annotation instanceof RetryWithCustomDelay) {
+      return instantiateFromCustomStrategy((RetryWithCustomDelay)annotation);
+    }
+    else {
       throw new IllegalArgumentException("Unsupported annotation");
+    }
+  }
+
+  /**
+   * Handles instantiating a {@link RetryStrategy} provided by an {@link RetryWithCustomDelay}
+   * @param customAnnotation the annotation
+   * @return a {@link RetryStrategy} if it could be instantiated
+   */
+  private static RetryStrategy instantiateFromCustomStrategy(RetryWithCustomDelay customAnnotation) {
+    Objects.requireNonNull(customAnnotation);
+    Class<? extends RetryStrategy> retryStrategyClass = customAnnotation.retryStrategy();
+    if (!RetryStrategy.class.isAssignableFrom(retryStrategyClass)) {
+      throw new IllegalArgumentException("RetryWithCustomDelay must provide a class that implements RetryStrategy");
+    }
+    try {
+      return retryStrategyClass.getDeclaredConstructor().newInstance();
+    }
+    catch (NoSuchMethodException e) {
+      throw new IllegalArgumentException("Provided class must have an accessible no-arg constructor");
+    }
+    catch (Exception e) {
+      throw new IllegalArgumentException("An error occurred instantiating the strategy", e);
     }
   }
 }
