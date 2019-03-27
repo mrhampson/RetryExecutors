@@ -13,9 +13,19 @@ need to have your request back-off for a while until the limit is up
    It delegates to the `ScheduledExecutorService` you pass it to run its task
 2. Create a `Runnable` and annotate with the desired `RetryStrategy`
    ```java
+   @RetryWithFixedDelay(delay = 1, delayUnit = TimeUnit.SECONDS, maxTries = 10)
+   class MyRunnable implements Runnable { }
+   
+   // or...
+   
    @RetryWithExponentialDelay(multiplier = 2, initialDelay = 1, initialDelayUnit = TimeUnit.SECONDS, maxTries = 5)
-   class MyRunnable implements Runnable {
+   class MyRunnable implements Runnable { }
+  
+   // or...
+   @RetryWithCustomDelay(retryStrategy = MyCustomRetryStrategyImpl.class)
+   class MyRunnable implements Runnable {   
    ```
+   A working implementation is shown in the unit tests in the source.
 3. Run the `Runnable` on the `RetryExecutor` and it will execute according to the policy noted in the annotation
    The `RetryExecutor` also lets you run an unannotated `Runnable`s as well
    
